@@ -1,0 +1,37 @@
+{
+    "C_Cpp.errorSquiggles": "disabled",
+    "python.autoComplete.extraPaths": [
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages",
+        "/home/vr/ros_catkin_ws/install/learning_urdf/lib/python3.10/site-packages",
+        "/home/vr/ros_catkin_ws/install/learning_topic/lib/python3.10/site-packages",
+        "/home/vr/ros_catkin_ws/install/learning_tf/lib/python3.10/site-packages",
+        "/home/vr/ros_catkin_ws/install/learning_service/lib/python3.10/site-packages",
+        "/home/vr/ros_catkin_ws/install/learning_qos/lib/python3.10/site-packages",
+        "/home/vr/ros_catkin_ws/install/learning_pkg_python/lib/python3.10/site-packages",
+        "/home/vr/ros_catkin_ws/install/learning_parameter/lib/python3.10/site-packages",
+        "/home/vr/ros_catkin_ws/install/learning_node/lib/python3.10/site-packages",
+        "/home/vr/ros_catkin_ws/install/learning_launch/lib/python3.10/site-packages",
+        "/home/vr/ros_catkin_ws/install/learning_action/lib/python3.10/site-packages",
+        "/home/vr/ros_catkin_ws/install/learning_interface/local/lib/python3.10/dist-packages",
+        "/home/vr/ros_catkin_ws/install/learning_gazebo/lib/python3.10/site-packages",
+        "/home/vr/ros_catkin_ws/install/learning_cv/lib/python3.10/site-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages",
+        "/home/vr/ros_catkin_ws/install/learning_urdf/lib/python3.10/site-packages",
+        "/home/vr/ros_catkin_ws/install/learning_topic/lib/python3.10/site-packages",
+        "/home/vr/ros_catkin_ws/install/learning_tf/lib/python3.10/site-packages",
+        "/home/vr/ros_catkin_ws/install/learning_service/lib/python3.10/site-packages",
+        "/home/vr/ros_catkin_ws/install/learning_qos/lib/python3.10/site-packages",
+        "/home/vr/ros_catkin_ws/install/learning_pkg_python/lib/python3.10/site-packages",
+        "/home/vr/ros_catkin_ws/install/learning_parameter/lib/python3.10/site-packages",
+        "/home/vr/ros_catkin_ws/install/learning_node/lib/python3.10/site-packages",
+        "/home/vr/ros_catkin_ws/install/learning_launch/lib/python3.10/site-packages",
+        "/home/vr/ros_catkin_ws/install/learning_action/lib/python3.10/site-packages",
+        "/home/vr/ros_catkin_ws/install/learning_interface/local/lib/python3.10/dist-packages",
+        "/home/vr/ros_catkin_ws/install/learning_gazebo/lib/python3.10/site-packages",
+        "/home/vr/ros_catkin_ws/install/learning_cv/lib/python3.10/site-packages"
+    ]
+}
