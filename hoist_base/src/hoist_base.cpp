@@ -21,16 +21,18 @@ class hoist_base : public rclcpp::Node {
 public:
     hoist_base() : Node("hoist_base"){
         port = this->declare_parameter<std::string>("port", "/dev/ttyUSB0");
-        imu_tf_child_frame_id = this->declare_parameter<std::string>("imu_tf_child_frame_id", "imu_base");
-        imu_tf_frame_id = this->declare_parameter<std::string>("imu_tf_frame_id", "imu_link");
+        imu_tf_child_frame_id = this->declare_parameter<std::string>("imu_tf_child_frame_id", "base_link");
+        imu_tf_frame_id = this->declare_parameter<std::string>("imu_tf_frame_id", "base_link");
         imu_frame_id = this->declare_parameter<std::string>("odomframe_id", "imu_link");
-		odom_child_frame_id = this->declare_parameter<std::string>("odom_tf_child_frame_id", "imu_base");
+		odom_child_frame_id = this->declare_parameter<std::string>("odom_tf_child_frame_id", "base_link");
         odom_frame_id = this->declare_parameter<std::string>("odom_frame_id", "odom");
         time_offset_in_seconds = this->declare_parameter<double>("time_offset_in_seconds", 0.0);
         broadcast_tf = this->declare_parameter<bool>("broadcast_tf", true);
-        linear_acceleration_stddev = this->declare_parameter<double>("linear_acceleration_stddev", 0.0);
-        angular_velocity_stddev = this->declare_parameter<double>("angular_velocity_stddev", 0.0);
-        orientation_stddev = this->declare_parameter<double>("orientation_stddev", 0.0);
+        imu_linear_acceleration_variance = this->declare_parameter<double>("imu_linear_acceleration_variance", 0.00117);
+        imu_angular_velocity_variance = this->declare_parameter<double>("imu_angular_velocity_variance", 0.0000238);
+        imu_orientation_variance = this->declare_parameter<double>("imu_orientation_variance", 0.002);
+		odom_linear_velocity_variance = this->declare_parameter<double>("odom_linear_velocity_variance", 0.2);
+        odom_angular_velocity_variance = this->declare_parameter<double>("odom_angular_velocity_variance", 0.2);
         imu_pub = this->create_publisher<sensor_msgs::msg::Imu>("imu", 100);
 		odom_pub = this->create_publisher<nav_msgs::msg::Odometry>("odom", 100);
         subscription = this->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", 10, std::bind(&hoist_base::cmd_vel_callback, this, std::placeholders::_1));
@@ -86,7 +88,9 @@ public:
         odom.twist.twist.linear.x = odom_v_x.d;
         odom.twist.twist.linear.y = odom_v_y.d;
         odom.twist.twist.angular.z = odom_v_th.d;
-   
+		odom.twist.covariance[0] = odom_linear_velocity_variance;
+		odom.twist.covariance[7] = odom_linear_velocity_variance;
+		odom.twist.covariance[35] = odom_angular_velocity_variance;
         //publish the message
         odom_pub->publish(odom);
         last_time = current_time;
@@ -125,6 +129,18 @@ public:
         imu.orientation.y = differential_rotation.y();
         imu.orientation.z = differential_rotation.z();
         imu.orientation.w = differential_rotation.w();
+
+		imu.linear_acceleration_covariance[0] = imu_linear_acceleration_variance; // 线性加速度协方差 = 线性加速度标准差?
+		imu.linear_acceleration_covariance[4] = imu_linear_acceleration_variance;
+		imu.linear_acceleration_covariance[8] = imu_linear_acceleration_variance;
+
+		imu.angular_velocity_covariance[0] = imu_angular_velocity_variance;
+		imu.angular_velocity_covariance[4] = imu_angular_velocity_variance;
+		imu.angular_velocity_covariance[8] = imu_angular_velocity_variance;
+
+		imu.orientation_covariance[0] = imu_orientation_variance;
+		imu.orientation_covariance[4] = imu_orientation_variance;
+		imu.orientation_covariance[8] = imu_orientation_variance;
 		imu_pub->publish(imu);
         geometry_msgs::msg::TransformStamped t;
 
@@ -155,9 +171,11 @@ private:
 	tf2::Quaternion zero_orientation;
     std::string input;
 	std::string read;
-    double linear_acceleration_stddev;
-    double angular_velocity_stddev;
-    double orientation_stddev;
+    double imu_linear_acceleration_variance;
+    double imu_angular_velocity_variance;
+    double imu_orientation_variance;
+	double odom_linear_velocity_variance;
+    double odom_angular_velocity_variance;
     size_t count_;
     float ratio = 1000.0f ;   //转速转换比例，执行速度调整比例
     float D = 0.2680859f ;    //两轮间距，单位是mm

@@ -23,6 +23,20 @@ ament_target_dependencies(hoist_base rclcpp std_msgs geometry_msgs sensor_msgs s
 install(TARGETS
   hoist_base
   DESTINATION lib/${PROJECT_NAME})
+install(
+  DIRECTORY
+    launch
+    config
+    world
+    urdf
+  DESTINATION share/${PROJECT_NAME}/
+)
+install(
+  PROGRAMS
+  launch/gazebo_hoist.launch.py
+  launch/hoist_base.launch.py
+  DESTINATION lib/${PROJECT_NAME}
+)
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   find_package(serial REQUIRED)
