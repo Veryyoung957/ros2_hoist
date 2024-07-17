@@ -69,7 +69,7 @@ def generate_launch_description():
                 
             )
     start_nav_mapping = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(pkg_share,'launch' 'hoist_mapping.launch.py')),
+        PythonLaunchDescriptionSource(os.path.join(pkg_share,'launch','hoist_mapping.launch.py')),
     )
     ld = LaunchDescription()
     ld.add_action(model)
