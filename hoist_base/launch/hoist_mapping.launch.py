@@ -24,7 +24,7 @@ def generate_launch_description():
         name='slam_toolbox',
         parameters=[
             slam_toolbox_mapping_file_dir,
-            {'use_sim_time': use_sim_time}
+            {'use_sim_time': "true"}
         ]
     )
     start_navigation2 = IncludeLaunchDescription(
