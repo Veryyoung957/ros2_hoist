@@ -263,7 +263,7 @@
 
 
   <!-- laser joint -->
-  <joint name="hokuyo_joint" type="fixed">
+  <joint name="laser_joint" type="fixed">
     <origin xyz="0.0 0.0 -0.0501" rpy="3.141592 0 0"/>
     <parent link="base_link"/>
     <axis xyz="0 1 0" />
