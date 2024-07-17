@@ -31,7 +31,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(os.path.join(navigation2_launch_dir, 'navigation_launch.py')),
         launch_arguments={
             'use_sim_time': use_sim_time,
-            # 'map': nav2_map_dir,
+            'map': '',
             'params_file': nav2_params_file_dir}.items()
     )
     ld = LaunchDescription()
