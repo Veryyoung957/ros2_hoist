@@ -8,6 +8,7 @@ from launch.conditions import LaunchConfigurationEquals, LaunchConfigurationNotE
 from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument, GroupAction
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from ament_index_python.packages import get_package_share_directory
+from launch_ros.parameter_descriptions import ParameterValue
 def generate_launch_description():
     pkg_share = get_package_share_directory('hoist_base')
     default_model_path = os.path.join(pkg_share, 'urdf/hoist.urdf')
@@ -18,7 +19,7 @@ def generate_launch_description():
     # slam_toolbox_map_dir = PathJoinSubstitution([pkg_share, 'map', world])
     # slam_toolbox_localization_file_dir = os.path.join(pkg_share, 'config', 'mapper_params_localization.yaml')
     # default_rviz_config_path = os.path.join(pkg_share, 'rviz/urdf_config.rviz')
-    model = launch.actions.DeclareLaunchArgument(name='model', default_value=default_model_path,
+    daclare_model = DeclareLaunchArgument(name='model', default_value=default_model_path,
                                         description='Absolute path to robot urdf file')
     # launch.actions.DeclareLaunchArgument(name='rvizconfig', default_value=default_rviz_config_path,
         #                                description='Absolute path to rviz config file'),
@@ -26,7 +27,8 @@ def generate_launch_description():
         'world',
         default_value='328',
         description='Select world (map file, pcd file, world file share the same name prefix as the this parameter)')
-    use_sim_time = launch.actions.DeclareLaunchArgument(name='use_sim_time', default_value='False',
+    use_sim_time = LaunchConfiguration('use_sim_time', default='false')
+    declare_use_sim_time = launch.actions.DeclareLaunchArgument(name='use_sim_time', default_value='False',
                                         description='Flag to enable use_sim_time')
     
     slam_toolbox_mapping_file_dir = os.path.join(pkg_share, 'config', 'mapper_params_online_async.yaml')
@@ -35,10 +37,17 @@ def generate_launch_description():
         package='hoist_base',
         executable='hoist_base',
     )
-    robot_state_publisher_node = launch_ros.actions.Node(
+    start_robot_state_publisher_cmd = launch_ros.actions.Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
-        parameters=[{'robot_description': launch_ros.descriptions.ParameterValue( launch.substitutions.Command(['xacro ',os.path.join(pkg_share,'urdf/hoist.urdf')]), value_type=str)  }]
+        name='robot_state_publisher',
+        parameters=[{
+            'use_sim_time': use_sim_time,
+            'robot_description': ParameterValue(
+                Command(['xacro ', str(default_model_path)]), value_type=str
+            ),
+        }],
+        output='screen'
     )
     joint_state_publisher_node = launch_ros.actions.Node(
         package='joint_state_publisher',
@@ -59,7 +68,7 @@ def generate_launch_description():
          executable='ekf_node',
          name='ekf_filter_node',
          output='screen',
-         parameters=[os.path.join(pkg_share, 'config/ekf.yaml'), {'use_sim_time': LaunchConfiguration('use_sim_time')}]
+         parameters=[os.path.join(pkg_share, 'config/ekf.yaml'), {'use_sim_time': use_sim_time}]
     )
     lidar_start = IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(os.path.join(rplidar,'launch','rplidar_a2m8_launch.py')),
@@ -72,10 +81,10 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(os.path.join(pkg_share,'launch','hoist_mapping.launch.py')),
     )
     ld = LaunchDescription()
-    ld.add_action(model)
-    ld.add_action(use_sim_time)
+    ld.add_action(daclare_model)
+    ld.add_action(declare_use_sim_time)
     ld.add_action(hoist_base)
-    ld.add_action(robot_state_publisher_node)
+    ld.add_action(start_robot_state_publisher_cmd)
     ld.add_action(joint_state_publisher_node)
     ld.add_action(lidar_start)
     ld.add_action(robot_localization_node)
