@@ -347,7 +347,9 @@ private:
 
 		//在写入串口的左右轮速度数据后加入”/r/n“
 		speed_data[0]=data_terminal0;
-		speed_data[13]=data_terminal1;
+		speed_data[13]=0;
+		speed_data[14]=0;
+		speed_data[15]=data_terminal1;
 		//写入数据到串口
 		size_t bytes_written = ser.write(speed_data,14);
     }
