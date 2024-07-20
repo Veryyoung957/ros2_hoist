@@ -27,7 +27,7 @@ public:
 		odom_child_frame_id = this->declare_parameter<std::string>("odom_tf_child_frame_id", "base_link");
         odom_frame_id = this->declare_parameter<std::string>("odom_frame_id", "odom");
         time_offset_in_seconds = this->declare_parameter<double>("time_offset_in_seconds", 0.0);
-        broadcast_tf = this->declare_parameter<bool>("broadcast_tf", true);
+        broadcast_tf = this->declare_parameter<bool>("broadcast_tf", false);
         imu_linear_acceleration_variance = this->declare_parameter<double>("imu_linear_acceleration_variance", 0.00117);
         imu_angular_velocity_variance = this->declare_parameter<double>("imu_angular_velocity_variance", 0.0000238);
         imu_orientation_variance = this->declare_parameter<double>("imu_orientation_variance", 0.002);
@@ -347,7 +347,9 @@ private:
 
 		//在写入串口的左右轮速度数据后加入”/r/n“
 		speed_data[0]=data_terminal0;
-		speed_data[13]=data_terminal1;
+		speed_data[13]=0;
+		speed_data[14]=0;
+		speed_data[15]=data_terminal1;
 		//写入数据到串口
 		size_t bytes_written = ser.write(speed_data,14);
     }
