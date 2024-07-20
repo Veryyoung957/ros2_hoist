@@ -12,9 +12,15 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     channel_type =  LaunchConfiguration('channel_type', default='serial')
+<<<<<<< Updated upstream
+    serial_port = LaunchConfiguration('serial_port', default='/dev/ttyUSB0')
+    serial_baudrate = LaunchConfiguration('serial_baudrate', default='115200')
+    frame_id = LaunchConfiguration('frame_id', default='scan')
+=======
     serial_port = LaunchConfiguration('serial_port', default='/dev/ttyUSB1')
     serial_baudrate = LaunchConfiguration('serial_baudrate', default='115200')
     frame_id = LaunchConfiguration('frame_id', default='laser_frame')
+>>>>>>> Stashed changes
     inverted = LaunchConfiguration('inverted', default='false')
     angle_compensate = LaunchConfiguration('angle_compensate', default='true')
     scan_mode = LaunchConfiguration('scan_mode', default='Sensitivity')

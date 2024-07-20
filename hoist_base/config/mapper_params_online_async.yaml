@@ -10,9 +10,15 @@ slam_toolbox:
     ceres_loss_function: None
 
     # ROS Parameters
+<<<<<<< Updated upstream
+    odom_frame: odom 
+    map_frame: map
+    base_frame: base_link 
+=======
     odom_frame: odom
     map_frame: map
     base_frame: base_footprint
+>>>>>>> Stashed changes
     scan_topic: /scan
     mode: mapping #localization
 

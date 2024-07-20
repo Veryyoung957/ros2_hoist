@@ -38,6 +38,13 @@ def generate_launch_description():
                        'bt_navigator',
                        'waypoint_follower']
 
+    lifecycle_nodes = ['controller_server',
+                       'planner_server',
+                       'recoveries_server',
+                       'bt_navigator',
+                       'waypoint_follower']
+>>>>>>> Stashed changes
+
     # Map fully qualified names to relative ones so the node's namespace can be prepended.
     # In case of the transforms (tf), currently, there doesn't seem to be a better alternative
     # https://github.com/ros/geometry2/issues/32

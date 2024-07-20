@@ -27,7 +27,11 @@ public:
 		odom_child_frame_id = this->declare_parameter<std::string>("odom_tf_child_frame_id", "base_link");
         odom_frame_id = this->declare_parameter<std::string>("odom_frame_id", "odom");
         time_offset_in_seconds = this->declare_parameter<double>("time_offset_in_seconds", 0.0);
+<<<<<<< Updated upstream
+        broadcast_tf = this->declare_parameter<bool>("broadcast_tf", true);
+=======
         broadcast_tf = this->declare_parameter<bool>("broadcast_tf", false);
+>>>>>>> Stashed changes
         imu_linear_acceleration_variance = this->declare_parameter<double>("imu_linear_acceleration_variance", 0.00117);
         imu_angular_velocity_variance = this->declare_parameter<double>("imu_angular_velocity_variance", 0.0000238);
         imu_orientation_variance = this->declare_parameter<double>("imu_orientation_variance", 0.002);
