@@ -189,7 +189,7 @@ private:
     unsigned char data_terminal0='s';	//“s"字符
     unsigned char data_terminal1='e';	//“e"字符
     unsigned long baud = 115200;
-    unsigned char speed_data[14]={0};
+    unsigned char speed_data[16]={0};
     std::string port;
     std::string imu_tf_child_frame_id;
     std::string imu_tf_frame_id;
