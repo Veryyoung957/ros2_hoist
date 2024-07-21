@@ -351,7 +351,7 @@ private:
 		speed_data[14]=0;
 		speed_data[15]=data_terminal1;
 		//写入数据到串口
-		size_t bytes_written = ser.write(speed_data,14);
+		size_t bytes_written = ser.write(speed_data,16);
     }
 
     rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr imu_pub;
