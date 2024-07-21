@@ -19,13 +19,14 @@ def generate_launch_description():
     
     slam_toolbox_mapping_file_dir = os.path.join(pkg_share, 'config', 'mapper_params_online_async.yaml')
     start_mapping = launch_ros.actions.Node(
+        parameters=[
+            slam_toolbox_mapping_file_dir,
+            {'use_sim_time': True}
+        ],
         package='slam_toolbox',
         executable='async_slam_toolbox_node',
         name='slam_toolbox',
-        parameters=[
-            slam_toolbox_mapping_file_dir,
-            {'use_sim_time': "true"}
-        ]
+        output='screen'
     )
     start_navigation2 = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(navigation2_launch_dir, 'navigation_launch.py')),
