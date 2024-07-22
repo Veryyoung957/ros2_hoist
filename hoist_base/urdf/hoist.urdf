@@ -18,7 +18,8 @@
 	</xacro:macro>
     <!-- <link name="dummy">
     </link> -->
-	<link name="base_footprint">
+  <link name="base_footprint"/>
+	<!-- <link name="base_footprint">
    		<visual>
 			<geometry>
       				<box size="0.425 0.4596 0.001"/>
@@ -26,7 +27,7 @@
 			<origin rpy="0 0 0" xyz="0 0 0"/>
    		</visual>
 		<xacro:default_inertial mass="0.0001"/>
- 	</link>
+ 	</link> -->
    <!-- <joint name="dummy_joint" type="fixed">
      <parent link="dummy"/>
      <child link="base_footprint"/>

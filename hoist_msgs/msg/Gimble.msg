@@ -1,2 +1,2 @@
-int64 mod_1
-int64 mod_2
+uint8 mod_1
+uint8 mod_2
