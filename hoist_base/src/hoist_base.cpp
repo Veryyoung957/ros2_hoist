@@ -16,6 +16,7 @@
 #include <string>
 #include "serial/serial.h"
 #include <tf2/impl/convert.h>
+#include "hoist_msgs/msg/gimble.hpp"
 using namespace std::chrono_literals;
 class hoist_base : public rclcpp::Node {
 public:
@@ -35,7 +36,8 @@ public:
         odom_angular_velocity_variance = this->declare_parameter<double>("odom_angular_velocity_variance", 0.2);
         imu_pub = this->create_publisher<sensor_msgs::msg::Imu>("imu", 100);
 		odom_pub = this->create_publisher<nav_msgs::msg::Odometry>("odom", 100);
-        subscription = this->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", 10, std::bind(&hoist_base::cmd_vel_callback, this, std::placeholders::_1));
+        subscription_cmd = this->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", 10, std::bind(&hoist_base::cmd_vel_callback, this, std::placeholders::_1));
+		subscription_gimble = this->create_subscription<hoist_msgs::msg::Gimble>("gimble", 10, std::bind(&hoist_base::gimble_callback, this, std::placeholders::_1));
         timer_ = this->create_wall_timer(
       5ms, std::bind(&hoist_base::timer_callback, this));
         imu_tf_broadcaster = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
@@ -353,15 +355,43 @@ private:
 		//写入数据到串口
 		size_t bytes_written = ser.write(speed_data,16);
     }
+	void gimble_callback(const hoist_msgs::msg::Gimble msg) 
+	{
+        unsigned long baud = 115200;	//小车串口波特率
+		ser.setPort(port.c_str());
+		ser.setBaudrate(115200);
+		serial::Timeout to = serial::Timeout::simpleTimeout(1000);
+		ser.setTimeout(to);
+		// ser.open();
+		// linear_temp = ratio*limit_vel_speed ;
+		//存入数据到要发布的左右轮速度消息
+
+		for(int i=0;i<4;i++)	//将左右轮速度存入数组中发送给串口
+		{
+			speed_data[i+1]=0;
+			speed_data[i+5]=0;
+			speed_data[i+9]=0;
+		}
+
+		//在写入串口的左右轮速度数据后加入”/r/n“
+		speed_data[0]=data_terminal0;
+		speed_data[13]=msg.mod_1;
+		speed_data[14]=msg.mod_2;
+		speed_data[15]=data_terminal1;
+		//写入数据到串口
+		size_t bytes_written = ser.write(speed_data,16);
+    }
 
     rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr imu_pub;
 	rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_pub;
-    rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr subscription;
+    rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr subscription_cmd;
+	rclcpp::Subscription<hoist_msgs::msg::Gimble>::SharedPtr subscription_gimble;
     std::unique_ptr<tf2_ros::TransformBroadcaster> imu_tf_broadcaster;
 	std::unique_ptr<tf2_ros::TransformBroadcaster> odom_tf_broadcaster;
 
     bool zero_orientation_set;
 };
+
 
 int main(int argc, char * argv[]) {
     rclcpp::init(argc, argv);
