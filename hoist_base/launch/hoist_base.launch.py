@@ -81,7 +81,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(os.path.join(pkg_share,'launch','hoist_mapping.launch.py')),
     )
     scan_filter = IncludeLaunchDescription(
-                PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('laser_filter'),'launch','box_filter.launch.py')),
+                PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('laser_filters'),'launch','box_filter.launch.py')),
     )
     ld = LaunchDescription()
     ld.add_action(daclare_model)

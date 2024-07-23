@@ -222,7 +222,7 @@ private:
 					input += read;
 
 					// 读到的字符串长度>=33  输入中可能有完整的包
-					while (input.length() >= 35) // while there might be a complete package in input
+					while (input.length() >= 43) // while there might be a complete package in input
 					{
 						//parse for data packets 解析数据包
 						data_packet_start = input.find("\x55\x51"); // 找开头的标记位
@@ -230,7 +230,7 @@ private:
 						if (data_packet_start != std::string::npos)
 						{	
 							// ROS_INFO("%d after if",data_packet_start);
-							if ((input.length() >= data_packet_start + 33) && (input.compare(data_packet_start + 11, 2, "\x55\x52") == 0) && (input.compare(data_packet_start + 22, 2, "\x55\x53") == 0)) //check if positions 26,27 exist, then test values
+							if ((input.length() >= data_packet_start + 43) && (input.compare(data_packet_start + 11, 2, "\x55\x52") == 0) && (input.compare(data_packet_start + 22, 2, "\x55\x53") == 0)) //check if positions 26,27 exist, then test values
 							{
 
 								
@@ -260,6 +260,7 @@ private:
 									// roll.data[1+i] = 0;
 									// pitch.data[1+i] = 0;
 								}
+								hoist_finish = input[data_packet_start+42];
 								imu_publisher();
 								car_twist_publisher();
 								// RCLCPP_INFO_STREAM(this->get_logger(), "My log message " << yaw.d * pi<<roll.d * pi<<pitch.d * pi);
@@ -388,7 +389,7 @@ private:
 	rclcpp::Subscription<hoist_msgs::msg::Gimble>::SharedPtr subscription_gimble;
     std::unique_ptr<tf2_ros::TransformBroadcaster> imu_tf_broadcaster;
 	std::unique_ptr<tf2_ros::TransformBroadcaster> odom_tf_broadcaster;
-
+	uint8_t hoist_finish;
     bool zero_orientation_set;
 };
 
