@@ -5,11 +5,11 @@ scan_to_scan_filter_chain:
       type: laser_filters/LaserScanBoxFilter
       params:
         box_frame: base_link
-        max_x: 0.2625
-        max_y: 0.2696
+        max_x: 0.2725
+        max_y: 0.2796
         max_z: 0.5
-        min_x: -0.2125
-        min_y: -0.2696
+        min_x: -0.2225
+        min_y: -0.2796
         min_z: 0.0
         
         invert: false # activate to remove all points outside of the box

@@ -27,7 +27,7 @@ class hoist_decision : public rclcpp::Node {
 public:
     hoist_decision() : Node("point_cloud_processor") {
         point_cloud_topic = this->declare_parameter<std::string>("point_cloud_topic", "/cloud");
-        odom_topic = this->declare_parameter<std::string>("odom_topic", "/odom");
+        odom_topic = this->declare_parameter<std::string>("odom_topic", "/odometry/filtered");
         r = this->declare_parameter<float>("distance_to_target", 0.4); // Distance r from target
 
         point_cloud_subscription_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
@@ -113,7 +113,7 @@ private:
 
     void odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg) {
         robot_position_ = msg->pose.pose.position;
-        RCLCPP_INFO(this->get_logger(), "Updated robot position to x: %f, y: %f, z: %f", robot_position_.x, robot_position_.y, robot_position_.z);
+        //RCLCPP_INFO(this->get_logger(), "Updated robot position to x: %f, y: %f, z: %f", robot_position_.x, robot_position_.y, robot_position_.z);
     }
 
     bool cycleProcessPoints(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
