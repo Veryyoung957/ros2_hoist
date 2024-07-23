@@ -97,4 +97,5 @@ def generate_launch_description():
     ld.add_action(start_nav_mapping)
     ld.add_action(declare_world_cmd)
     ld.add_action(scan_filter)
+    ld.add_action(scan_to_pointcloud)
     return ld
