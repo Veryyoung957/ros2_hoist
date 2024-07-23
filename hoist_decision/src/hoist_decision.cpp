@@ -41,23 +41,23 @@ public:
         service_ = this->create_service<std_srvs::srv::Trigger>(
             "cycle_process_points", std::bind(&hoist_decision::cycleProcessPoints, this, std::placeholders::_1, std::placeholders::_2));
 
-        target_points_.push_back(create_point(0.0, 0.05));
-        target_points_.push_back(create_point(0.0, 0.425));
-        target_points_.push_back(create_point(-1.29903, 0.425));
-        target_points_.push_back(create_point(-0.64951, 0.6125));
-        target_points_.push_back(create_point(-1.29903, 1.175));
-        target_points_.push_back(create_point(-0.64951, 0.9875));
-        target_points_.push_back(create_point(0.0, 1.550));
-        target_points_.push_back(create_point(0.0, 1.175));
-        target_points_.push_back(create_point(1.29903, 1.175));
-        target_points_.push_back(create_point(0.64951, 0.9875));
-        target_points_.push_back(create_point(1.29903, 0.425));
-        target_points_.push_back(create_point(0.64951, 0.6125));
-        special_point_ = create_point(0.0,1.2);  // Special target point
-        target_points_set.push_back(create_point(0.755, -1.305));
-        target_points_set.push_back(create_point(-0.755, -1.305));
-        target_points_set.push_back(create_point(0.755, 1.755));
-        target_points_set.push_back(create_point(-0.755, 1.755));
+        target_points_.push_back(create_point(0.05, 0.0));
+        target_points_.push_back(create_point(0.425, 0.));
+        target_points_.push_back(create_point(0.425, 1.29903));
+        target_points_.push_back(create_point(0.6125, 0.64951));
+        target_points_.push_back(create_point(1.175, 1.29903));
+        target_points_.push_back(create_point(0.9875, 0.64951));
+        target_points_.push_back(create_point(1.550, 0.0));
+        target_points_.push_back(create_point(1.175, 0.0));
+        target_points_.push_back(create_point(1.175, -1.29903));
+        target_points_.push_back(create_point(0.9875, -0.64951));
+        target_points_.push_back(create_point(0.425, -1.29903));
+        target_points_.push_back(create_point(0.6125, -0.64951));
+        special_point_ = create_point(1.2,0.0);  // Special target point
+        target_points_set.push_back(create_point(-1.305, -0.755));
+        target_points_set.push_back(create_point(-1.305, 0.755));
+        target_points_set.push_back(create_point(1.755, 0.755));
+        target_points_set.push_back(create_point(1.755, -0.755));
     }
     bool GoToPose(geometry_msgs::msg::Pose::SharedPtr pose,int mode_1,int mode_2)
     {
