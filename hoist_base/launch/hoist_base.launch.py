@@ -83,6 +83,9 @@ def generate_launch_description():
     scan_filter = IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('laser_filters'),'launch','box_filter.launch.py')),
     )
+    scan_to_pointcloud = IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('pointcloud_to_laserscan'),'launch','sample_laserscan_to_pointcloud_launch.py')),
+    )
     ld = LaunchDescription()
     ld.add_action(daclare_model)
     ld.add_action(declare_use_sim_time)
