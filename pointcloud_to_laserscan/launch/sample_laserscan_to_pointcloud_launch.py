@@ -26,16 +26,16 @@ def generate_launch_description():
         #     ],
         #     name='scan_publisher'
         # ),
-        Node(
-            package='tf2_ros',
-            executable='static_transform_publisher',
-            name='static_transform_publisher',
-            arguments=[
-                '--x', '0', '--y', '0', '--z', '0',
-                '--qx', '0', '--qy', '0', '--qz', '0', '--qw', '1',
-                '--frame-id', 'map', '--child-frame-id', 'scan'
-            ]
-        ),
+        # Node(
+        #     package='tf2_ros',
+        #     executable='static_transform_publisher',
+        #     name='static_transform_publisher',
+        #     arguments=[
+        #         '--x', '0', '--y', '0', '--z', '0',
+        #         '--qx', '0', '--qy', '0', '--qz', '0', '--qw', '1',
+        #         '--frame-id', 'map', '--child-frame-id', 'scan'
+        #     ]
+        # ),
         Node(
             package='pointcloud_to_laserscan',
             executable='laserscan_to_pointcloud_node',

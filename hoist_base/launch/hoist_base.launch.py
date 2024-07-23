@@ -80,6 +80,9 @@ def generate_launch_description():
     start_nav_mapping = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(pkg_share,'launch','hoist_mapping.launch.py')),
     )
+    scan_filter = IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('laser_filter'),'launch','box_filter.launch.py')),
+    )
     ld = LaunchDescription()
     ld.add_action(daclare_model)
     ld.add_action(declare_use_sim_time)
@@ -90,4 +93,5 @@ def generate_launch_description():
     ld.add_action(robot_localization_node)
     ld.add_action(start_nav_mapping)
     ld.add_action(declare_world_cmd)
+    ld.add_action(scan_filter)
     return ld
