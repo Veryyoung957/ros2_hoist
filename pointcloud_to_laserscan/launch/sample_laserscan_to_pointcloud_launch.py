@@ -40,8 +40,8 @@ def generate_launch_description():
             package='pointcloud_to_laserscan',
             executable='laserscan_to_pointcloud_node',
             name='laserscan_to_pointcloud',
-            remappings=[('scan_in', [LaunchConfiguration(variable_name='scanner'), '/scan_filtered']),
-                        ('cloud', [LaunchConfiguration(variable_name='scanner'), '/cloud'])],
+            remappings=[('scan_in', ['/scan_filtered']),
+                        ('cloud', ['/cloud'])],
             parameters=[{'target_frame': 'map', 'transform_tolerance': 0.01}]
         ),
     ])
