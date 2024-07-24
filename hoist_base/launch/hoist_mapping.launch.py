@@ -44,4 +44,5 @@ def generate_launch_description():
     ld.add_action(model)
     ld.add_action(start_mapping)
     ld.add_action(start_navigation2)
+    ld.add_action(declare_params_file_cmd)
     return ld
