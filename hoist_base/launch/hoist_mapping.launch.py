@@ -21,7 +21,7 @@ def generate_launch_description():
     start_mapping = launch_ros.actions.Node(
         parameters=[
             slam_toolbox_mapping_file_dir,
-            {'use_sim_time': False}
+            {'use_sim_time': True}
         ],
         package='slam_toolbox',
         executable='async_slam_toolbox_node',
@@ -32,6 +32,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(os.path.join(navigation2_launch_dir, 'navigation_launch.py')),
         launch_arguments={
             'use_sim_time': use_sim_time,
+            'map': '',
             'params_file': nav2_params_file_dir}.items()
     )
     ld = LaunchDescription()
