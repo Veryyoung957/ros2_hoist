@@ -12,11 +12,16 @@ def generate_launch_description():
     pkg_share = get_package_share_directory('hoist_base')
     default_model_path = os.path.join(pkg_share, 'urdf/hoist.urdf')
     navigation2_launch_dir = os.path.join(get_package_share_directory('hoist_navigation'), 'launch')
-    nav2_params_file_dir = os.path.join(pkg_share, 'config', 'nav2_params_real.yaml')
+    # nav2_params_file_dir = os.path.join(pkg_share, 'config', 'nav2_params_real.yaml')
+    params_file = LaunchConfiguration('params_file')
     model = launch.actions.DeclareLaunchArgument(name='model', default_value=default_model_path,
                                         description='Absolute path to robot urdf file')
     use_sim_time = LaunchConfiguration('use_sim_time', default='False')
-    
+    declare_params_file_cmd = DeclareLaunchArgument(
+        'params_file',
+        default_value=os.path.join(pkg_share, 'params', 'nav2_params.yaml'),
+        description='Full path to the ROS2 parameters file to use for all launched nodes')
+
     slam_toolbox_mapping_file_dir = os.path.join(pkg_share, 'config', 'mapper_params_online_async.yaml')
     start_mapping = launch_ros.actions.Node(
         parameters=[
@@ -33,7 +38,7 @@ def generate_launch_description():
         launch_arguments={
             'use_sim_time': use_sim_time,
             'map': '',
-            'params_file': nav2_params_file_dir}.items()
+            'params_file': params_file}.items()
     )
     ld = LaunchDescription()
     ld.add_action(model)
