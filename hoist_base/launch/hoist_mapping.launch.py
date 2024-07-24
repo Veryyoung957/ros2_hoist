@@ -19,7 +19,7 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time', default='False')
     declare_params_file_cmd = DeclareLaunchArgument(
         'params_file',
-        default_value=os.path.join(pkg_share, 'params', 'nav2_params.yaml'),
+        default_value=os.path.join(pkg_share, 'config', 'nav2_params_real.yaml'),
         description='Full path to the ROS2 parameters file to use for all launched nodes')
 
     slam_toolbox_mapping_file_dir = os.path.join(pkg_share, 'config', 'mapper_params_online_async.yaml')
