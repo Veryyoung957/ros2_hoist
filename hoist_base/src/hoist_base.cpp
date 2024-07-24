@@ -32,8 +32,9 @@ public:
         imu_linear_acceleration_variance = this->declare_parameter<double>("imu_linear_acceleration_variance", 0.00117);
         imu_angular_velocity_variance = this->declare_parameter<double>("imu_angular_velocity_variance", 0.0000238);
         imu_orientation_variance = this->declare_parameter<double>("imu_orientation_variance", 0.002);
-		odom_linear_velocity_variance = this->declare_parameter<double>("odom_linear_velocity_variance", 0.2);
-        odom_angular_velocity_variance = this->declare_parameter<double>("odom_angular_velocity_variance", 0.2);
+		odom_linear_velocity_variance = this->declare_parameter<double>("odom_linear_velocity_variance", 0.5);
+        odom_angular_velocity_variance = this->declare_parameter<double>("odom_angular_velocity_variance", 2);
+		timeout = this->declare_parameter<double>("timeout",0.02);
         imu_pub = this->create_publisher<sensor_msgs::msg::Imu>("imu", 100);
 		odom_pub = this->create_publisher<nav_msgs::msg::Odometry>("odom", 100);
         subscription_cmd = this->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", 10, std::bind(&hoist_base::cmd_vel_callback, this, std::placeholders::_1));
@@ -44,7 +45,6 @@ public:
 		odom_tf_broadcaster = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
     }
 	bool car_twist_publisher(){
-		current_time = now();
 		rclcpp::Duration duration = current_time - last_time;
 		double dt = duration.seconds();
         double delta_x = (odom_v_x.d * cos(odom_th) - odom_v_y.d * sin(odom_th)) * dt;
@@ -91,7 +91,7 @@ public:
         odom.twist.twist.linear.y = odom_v_y.d;
         odom.twist.twist.angular.z = odom_v_th.d;
 		odom.twist.covariance[0] = odom_linear_velocity_variance;
-		odom.twist.covariance[7] = odom_linear_velocity_variance;
+		odom.twist.covariance[7] = 3;
 		odom.twist.covariance[35] = odom_angular_velocity_variance;
         //publish the message
         odom_pub->publish(odom);
@@ -211,6 +211,7 @@ private:
 	unsigned char data[4];
 	}accel[3],vel_angular[3],yaw,roll,pitch,cmd_x,cmd_y,cmd_z,odom_v_x,odom_v_y,odom_v_th;
     void timer_callback(){
+		current_time = now();
         try
 		{
 			if (ser.isOpen()) // 端口打开
@@ -232,17 +233,6 @@ private:
 							// ROS_INFO("%d after if",data_packet_start);
 							if ((input.length() >= data_packet_start + 43) && (input.compare(data_packet_start + 11, 2, "\x55\x52") == 0) && (input.compare(data_packet_start + 22, 2, "\x55\x53") == 0)) //check if positions 26,27 exist, then test values
 							{
-
-								
-								/**
-								 * 采用和陀螺仪同样的计算方法，当AFS_SEL=3时，数字-32767对应-16g，32767对应16g。把32767除以16，就可以得到2048， 即我们说的灵敏度。把从加速度计读出的数字除以2048，就可以换算成加速度的数值。举个例子，如果我们从加速度计读到的数字是1000，那么对应的加速度数据是1000/2048=0.49g。g为加速度的单位，重力加速度定义为1g, 等于9.8米每平方秒。
-								 * 
-								 * 也就是说说直接从imu中读取到的并不是真正的加速度值，而是一个比例值，相当于几倍的重力加速度g
-								 * 
-								 **/
-								
-
-								// get gyro values 获得陀螺值
 								for(int i = 0;i<3;i++){
 									vel_angular[0].data[1+i] = input[data_packet_start+2+i];
 									vel_angular[1].data[1+i] = input[data_packet_start+5+i];
@@ -316,24 +306,29 @@ private:
 			{
 				// ROS_DEBUG_STREAM("Serial port " << ser.getPort() << " initialized and opened.");
 			}
+
+		
 		}
     catch (serial::IOException &e)
 		{
 			RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), d.nanoseconds()/1000000,"Error reading from the serial port " << ser.getPort() << ". Closing connection.");
 			ser.close();
 		}
+		if ((current_time - cmd_vel_last_received).nanoseconds()/1e9 > timeout){
+			for(int i=0;i<4;i++)	//将左右轮速度存入数组中发送给串口
+			{
+				speed_data[i+1]=cmd_x.data[i];
+				speed_data[i+5]=cmd_y.data[i];
+				speed_data[i+9]=cmd_z.data[i];
+			}
+			size_t bytes_written = ser.write(speed_data,16);
+			cmd_vel_last_received = this->get_clock()->now();
+		}
     }
 
     void cmd_vel_callback(const geometry_msgs::msg::Twist msg) 
 	{
         unsigned long baud = 115200;	//小车串口波特率
-		// serial::Serial my_serial(port, baud, serial::Timeout::simpleTimeout(1000));	//配置串口
-		// angular_temp = 0.5f*cmd_input.angular.z*D ;//获取/cmd_vel的角速度并转化为小车所规定的速度
-		// linear_temp =cmd_input.linear.x ;//获取/cmd_vel的线速度并转化为小车所规定的速度
-		ser.setPort(port.c_str());
-		ser.setBaudrate(115200);
-		serial::Timeout to = serial::Timeout::simpleTimeout(1000);
-		ser.setTimeout(to);
 		// ser.open();
 		// linear_temp = ratio*limit_vel_speed ;
 		cmd_x.d = msg.linear.x;
@@ -355,6 +350,8 @@ private:
 		speed_data[15]=data_terminal1;
 		//写入数据到串口
 		size_t bytes_written = ser.write(speed_data,16);
+		cmd_vel_last_received = this->get_clock()->now();
+
     }
 	void gimble_callback(const hoist_msgs::msg::Gimble msg) 
 	{
@@ -389,8 +386,10 @@ private:
 	rclcpp::Subscription<hoist_msgs::msg::Gimble>::SharedPtr subscription_gimble;
     std::unique_ptr<tf2_ros::TransformBroadcaster> imu_tf_broadcaster;
 	std::unique_ptr<tf2_ros::TransformBroadcaster> odom_tf_broadcaster;
+	rclcpp::Time cmd_vel_last_received = this->get_clock()->now();
 	uint8_t hoist_finish;
     bool zero_orientation_set;
+	double timeout;
 };
 
 
