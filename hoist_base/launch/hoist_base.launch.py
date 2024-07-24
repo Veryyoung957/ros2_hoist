@@ -27,7 +27,7 @@ def generate_launch_description():
         'world',
         default_value='328',
         description='Select world (map file, pcd file, world file share the same name prefix as the this parameter)')
-    use_sim_time = LaunchConfiguration('use_sim_time', default='false')
+    use_sim_time = LaunchConfiguration('use_sim_time', default='False')
     declare_use_sim_time = launch.actions.DeclareLaunchArgument(name='use_sim_time', default_value='False',
                                         description='Flag to enable use_sim_time')
     
