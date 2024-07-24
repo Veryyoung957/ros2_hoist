@@ -41,8 +41,8 @@ def generate_launch_description():
             'params_file': params_file}.items()
     )
     ld = LaunchDescription()
+    ld.add_action(declare_params_file_cmd)
     ld.add_action(model)
     ld.add_action(start_mapping)
     ld.add_action(start_navigation2)
-    ld.add_action(declare_params_file_cmd)
     return ld
