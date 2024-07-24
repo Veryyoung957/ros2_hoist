@@ -108,7 +108,7 @@ public:
 private:
     void pointCloudCallback(const sensor_msgs::msg::PointCloud2::SharedPtr msg) {
         last_received_cloud_ = msg;
-        RCLCPP_INFO(this->get_logger(), "Received and stored new point cloud data.");
+        RCLCPP_INFO_ONCE(this->get_logger(), "Received and stored new point cloud data.");
     }
 
     void odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg) {
@@ -280,7 +280,7 @@ private:
             float y = *iter_y;
             float z = *iter_z;
             
-            if (isPointInRegion(x, y, points_->x, points_->y, 0.18)) {
+            if (isPointInRegion(x, y, points_->x, points_->y, 0.08)) {
                 // geometry_msgs::msg::Point pt{point.x, point.y, point.z};
                 return true;
             }

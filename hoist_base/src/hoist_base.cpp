@@ -332,7 +332,7 @@ private:
 		// ser.open();
 		// linear_temp = ratio*limit_vel_speed ;
 		cmd_x.d = msg.linear.x;
-		cmd_y.d = msg.linear.y;
+		cmd_y.d = 1.7*msg.linear.y;
 		cmd_z.d = msg.angular.z;
 		//存入数据到要发布的左右轮速度消息
 
