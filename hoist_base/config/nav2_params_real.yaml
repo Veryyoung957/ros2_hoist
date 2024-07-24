@@ -132,24 +132,24 @@ controller_server:
     FollowPath:
       plugin: "dwb_core::DWBLocalPlanner"
       debug_trajectory_details: True
-      min_vel_x: 0.0
-      min_vel_y: 0.0
-      max_vel_x: 0.36
-      max_vel_y: 0.36
-      max_vel_theta: 2.0
-      min_speed_xy: 0.0
-      max_speed_xy: 0.36
-      min_speed_theta: 0.0
+      min_vel_x: -0.56
+      min_vel_y: -0.56
+      max_vel_x: 0.56
+      max_vel_y: 0.56
+      max_vel_theta: 3.0
+      min_speed_xy: -0.56
+      max_speed_xy: 0.56
+      min_speed_theta: -3.0
       # Add high threshold velocity for turtlebot 3 issue.
       # https://github.com/ROBOTIS-GIT/turtlebot3_simulations/issues/75
       acc_lim_x: 2.5
-      acc_lim_y: 0.0
+      acc_lim_y: 2.0
       acc_lim_theta: 3.2
       decel_lim_x: -2.5
-      decel_lim_y: 0.0
+      decel_lim_y: -2.0
       decel_lim_theta: -3.2
       vx_samples: 20
-      vy_samples: 5
+      vy_samples: 15
       vtheta_samples: 20
       sim_time: 1.7
       linear_granularity: 0.05
@@ -178,8 +178,8 @@ controller_server_rclcpp_node:
 local_costmap:
   local_costmap:
     ros__parameters:
-      update_frequency: 5.0
-      publish_frequency: 2.0
+      update_frequency: 20.0
+      publish_frequency: 10.0
       global_frame: odom
       robot_base_frame: base_link
       use_sim_time: False
@@ -226,8 +226,8 @@ local_costmap:
 global_costmap:
   global_costmap:
     ros__parameters:
-      update_frequency: 1.0
-      publish_frequency: 1.0
+      update_frequency: 15.0
+      publish_frequency: 7.0
       global_frame: map
       robot_base_frame: base_link
       use_sim_time: False
