@@ -116,9 +116,10 @@ private:
         //RCLCPP_INFO(this->get_logger(), "Updated robot position to x: %f, y: %f, z: %f", robot_position_.x, robot_position_.y, robot_position_.z);
     }
 
-    bool cycleProcessPoints(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+    void cycleProcessPoints(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                             std::shared_ptr<std_srvs::srv::Trigger::Response> response) {
         sorted_target_points_ = findAndSortPointsInRegion(target_points_);
+        RCLCPP_INFO(this->get_logger(), "seriver is called");
         std::sort(target_points_set.begin(), target_points_set.end(), 
                   [this](const geometry_msgs::msg::Point& a, const geometry_msgs::msg::Point& b) {
                       return distanceToPoint(a) < distanceToPoint(b);
@@ -140,7 +141,7 @@ private:
         }
         cycle_counter_++;  // Increase the counter
         response->success = true;
-        return true;
+        // return true;
     }
 
     void performFirstAction() {
@@ -279,7 +280,7 @@ private:
             float y = *iter_y;
             float z = *iter_z;
             
-            if (isPointInRegion(x, y, points_->x, points_->y, 0.08)) {
+            if (isPointInRegion(x, y, points_->x, points_->y, 0.18)) {
                 // geometry_msgs::msg::Point pt{point.x, point.y, point.z};
                 return true;
             }

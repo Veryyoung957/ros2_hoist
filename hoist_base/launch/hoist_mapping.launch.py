@@ -14,8 +14,6 @@ def generate_launch_description():
     navigation2_launch_dir = os.path.join(get_package_share_directory('hoist_navigation'), 'launch')
     # nav2_params_file_dir = os.path.join(pkg_share, 'config', 'nav2_params_real.yaml')
     params_file = LaunchConfiguration('params_file')
-    model = launch.actions.DeclareLaunchArgument(name='model', default_value=default_model_path,
-                                        description='Absolute path to robot urdf file')
     use_sim_time = LaunchConfiguration('use_sim_time', default='False')
     declare_params_file_cmd = DeclareLaunchArgument(
         'params_file',
@@ -41,7 +39,6 @@ def generate_launch_description():
     )
     ld = LaunchDescription()
     ld.add_action(declare_params_file_cmd)
-    ld.add_action(model)
     ld.add_action(start_mapping)
     ld.add_action(start_navigation2)
     return ld
