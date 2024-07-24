@@ -31,7 +31,7 @@ public:
         r = this->declare_parameter<float>("distance_to_target", 0.4); // Distance r from target
 
         point_cloud_subscription_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
-            point_cloud_topic, 10, std::bind(&hoist_decision::pointCloudCallback, this, std::placeholders::_1));
+            point_cloud_topic, rclcpp::SensorDataQoS(), std::bind(&hoist_decision::pointCloudCallback, this, std::placeholders::_1));
 
         odom_subscription_ = this->create_subscription<nav_msgs::msg::Odometry>(
             odom_topic, 10, std::bind(&hoist_decision::odomCallback, this, std::placeholders::_1));
