@@ -15,7 +15,7 @@ def generate_launch_description():
     nav2_params_file_dir = os.path.join(pkg_share, 'config', 'nav2_params_real.yaml')
     model = launch.actions.DeclareLaunchArgument(name='model', default_value=default_model_path,
                                         description='Absolute path to robot urdf file')
-    use_sim_time = LaunchConfiguration('use_sim_time')
+    use_sim_time = LaunchConfiguration('use_sim_time', default='False')
     
     slam_toolbox_mapping_file_dir = os.path.join(pkg_share, 'config', 'mapper_params_online_async.yaml')
     start_mapping = launch_ros.actions.Node(

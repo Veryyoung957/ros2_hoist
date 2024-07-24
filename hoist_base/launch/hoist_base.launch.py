@@ -16,9 +16,6 @@ def generate_launch_description():
     # world = LaunchConfiguration('world')
     # nav2_map_dir = PathJoinSubstitution([pkg_share, 'map', world]), ".yaml"
     nav2_params_file_dir = os.path.join(pkg_share, 'config', 'nav2_params_real.yaml')
-    # slam_toolbox_map_dir = PathJoinSubstitution([pkg_share, 'map', world])
-    # slam_toolbox_localization_file_dir = os.path.join(pkg_share, 'config', 'mapper_params_localization.yaml')
-    # default_rviz_config_path = os.path.join(pkg_share, 'rviz/urdf_config.rviz')
     daclare_model = DeclareLaunchArgument(name='model', default_value=default_model_path,
                                         description='Absolute path to robot urdf file')
     # launch.actions.DeclareLaunchArgument(name='rvizconfig', default_value=default_rviz_config_path,
