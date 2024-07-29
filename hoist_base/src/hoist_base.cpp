@@ -33,7 +33,7 @@ public:
         imu_angular_velocity_variance = this->declare_parameter<double>("imu_angular_velocity_variance", 0.0000238);
         imu_orientation_variance = this->declare_parameter<double>("imu_orientation_variance", 0.002);
 		odom_linear_velocity_variance = this->declare_parameter<double>("odom_linear_velocity_variance", 0.5);
-        odom_angular_velocity_variance = this->declare_parameter<double>("odom_angular_velocity_variance", 2);
+        odom_angular_velocity_variance = this->declare_parameter<double>("odom_angular_velocity_variance", 20);
 		timeout = this->declare_parameter<double>("timeout",0.02);
         imu_pub = this->create_publisher<sensor_msgs::msg::Imu>("imu", 100);
 		odom_pub = this->create_publisher<nav_msgs::msg::Odometry>("odom", 100);
@@ -91,7 +91,7 @@ public:
         odom.twist.twist.linear.y = odom_v_y.d;
         odom.twist.twist.angular.z = odom_v_th.d;
 		odom.twist.covariance[0] = odom_linear_velocity_variance;
-		odom.twist.covariance[7] = 3;
+		odom.twist.covariance[7] = 30;
 		odom.twist.covariance[35] = odom_angular_velocity_variance;
         //publish the message
         odom_pub->publish(odom);
