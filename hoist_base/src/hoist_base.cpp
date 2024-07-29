@@ -241,8 +241,8 @@ private:
 									accel[1].data[1+i] = input[data_packet_start+16+i];
 									accel[2].data[1+i] = input[data_packet_start+19+i];
 									yaw.data[1+i] = input[data_packet_start+24+i];
-									roll.data[1+i] = input[data_packet_start+27+i];
-									pitch.data[1+i] = input[data_packet_start+30+i];
+									pitch.data[1+i] = input[data_packet_start+27+i];
+									roll.data[1+i] = input[data_packet_start+30+i];
 									odom_v_x.data[1+i] = input[data_packet_start+33+i];
 									odom_v_y.data[1+i] = input[data_packet_start+36+i];
 									odom_v_th.data[1+i] = input[data_packet_start+39+i];
