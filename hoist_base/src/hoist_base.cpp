@@ -99,7 +99,7 @@ public:
 	}
 	bool imu_publisher(){
 		tf2::Matrix3x3 obs_mat;
-		obs_mat.setEulerYPR(yaw.d, pitch.d, roll.d);
+		obs_mat.setEulerYPR(-yaw.d, pitch.d, roll.d);
 		tf2::Quaternion orientation;
 		obs_mat.getRotation(orientation);
 		if (!zero_orientation_set)
