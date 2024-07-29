@@ -37,7 +37,7 @@ public:
 		timeout = this->declare_parameter<double>("timeout",0.02);
         imu_pub = this->create_publisher<sensor_msgs::msg::Imu>("imu", 100);
 		odom_pub = this->create_publisher<nav_msgs::msg::Odometry>("odom", 100);
-        subscription_cmd = this->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", 10, std::bind(&hoist_base::cmd_vel_callback, this, std::placeholders::_1));
+        subscription_cmd = this->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", 100, std::bind(&hoist_base::cmd_vel_callback, this, std::placeholders::_1));
 		subscription_gimble = this->create_subscription<hoist_msgs::msg::Gimble>("gimble", 10, std::bind(&hoist_base::gimble_callback, this, std::placeholders::_1));
         timer_ = this->create_wall_timer(
       5ms, std::bind(&hoist_base::timer_callback, this));
