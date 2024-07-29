@@ -22,9 +22,22 @@
 #define FOLLOW_PATH 5
 #define FOLLOW_WAYPOINTS 6
 
+enum class ActionStatus
+{
+  UNKNOWN = 0,
+  PROCESSING = 1,
+  FAILED = 2,
+  SUCCEEDED = 3
+};
+
+using namespace std::chrono_literals;
 
 class hoist_decision : public rclcpp::Node {
 public:
+    // using ActionT = nav2_msgs::action::FollowWaypoints;
+    using ClientT = nav2_msgs::action::NavigateToPose;
+    // using ActionServer = nav2_util::SimpleActionServer<ActionT>;
+    using ActionClient = rclcpp_action::Client<ClientT>;
     hoist_decision() : Node("point_cloud_processor") {
         point_cloud_topic = this->declare_parameter<std::string>("point_cloud_topic", "/cloud");
         odom_topic = this->declare_parameter<std::string>("odom_topic", "/odometry/filtered");
@@ -37,74 +50,103 @@ public:
             odom_topic, 10, std::bind(&hoist_decision::odomCallback, this, std::placeholders::_1));
 
         gimble_publisher_ = this->create_publisher<hoist_msgs::msg::Gimble>("gimble_mode",4);
-
+        // callback_group_ = create_callback_group(
+        //     rclcpp::CallbackGroupType::MutuallyExclusive,
+        //     false);
+        // callback_group_executor_.add_callback_group(callback_group_, get_node_base_interface());
+        service_cb_group_ = create_callback_group(rclcpp::CallbackGroupType::Reentrant);;
         service_ = this->create_service<std_srvs::srv::Trigger>(
-            "cycle_process_points", std::bind(&hoist_decision::cycleProcessPoints, this, std::placeholders::_1, std::placeholders::_2));
-
-        target_points_.push_back(create_point(0.05, 0.0));
-        target_points_.push_back(create_point(0.425, 0.));
-        target_points_.push_back(create_point(0.425, 1.29903));
-        target_points_.push_back(create_point(0.6125, 0.64951));
-        target_points_.push_back(create_point(1.175, 1.29903));
-        target_points_.push_back(create_point(0.9875, 0.64951));
-        target_points_.push_back(create_point(1.550, 0.0));
-        target_points_.push_back(create_point(1.175, 0.0));
-        target_points_.push_back(create_point(1.175, -1.29903));
-        target_points_.push_back(create_point(0.9875, -0.64951));
-        target_points_.push_back(create_point(0.425, -1.29903));
-        target_points_.push_back(create_point(0.6125, -0.64951));
-        special_point_ = create_point(1.2,0.0);  // Special target point
-        target_points_set.push_back(create_point(-1.305, -0.755));
-        target_points_set.push_back(create_point(-1.305, 0.755));
-        target_points_set.push_back(create_point(1.755, 0.755));
-        target_points_set.push_back(create_point(1.755, -0.755));
+            "cycle_process_points", std::bind(&hoist_decision::cycleProcessPoints, this, std::placeholders::_1, std::placeholders::_2),rmw_qos_profile_services_default, service_cb_group_);
+        callback_group_ = create_callback_group(
+            rclcpp::CallbackGroupType::Reentrant,
+            false);
+        callback_group_executor_.add_callback_group(callback_group_, get_node_base_interface());
+        nav_to_pose_client = rclcpp_action::create_client<ClientT>(
+            get_node_base_interface(),
+            get_node_graph_interface(),
+            get_node_logging_interface(),
+            get_node_waitables_interface(),
+            "navigate_to_pose", callback_group_);
+        target_points_.push_back(create_point(0.0, 0.05f));
+        target_points_.push_back(create_point(0.0, 0.425));
+        target_points_.push_back(create_point(-1.29903, 0.425));
+        target_points_.push_back(create_point(-0.64951, 0.6125));
+        target_points_.push_back(create_point(-1.29903, 1.175));
+        target_points_.push_back(create_point(-0.64951, 0.9875));
+        target_points_.push_back(create_point(0.0, 1.550));
+        target_points_.push_back(create_point(0.0, 1.175));
+        target_points_.push_back(create_point(1.29903, 1.175));
+        target_points_.push_back(create_point(0.64951, 0.9875));
+        target_points_.push_back(create_point(1.29903, 0.425));
+        target_points_.push_back(create_point(0.64951, 0.6125));
+        special_point_ = create_point(0.0,1.2);  // Special target point
+        target_points_set.push_back(create_point(0.755, -1.305));
+        target_points_set.push_back(create_point(-0.755, -1.305));
+        target_points_set.push_back(create_point(-0.755, 1.755));
+        target_points_set.push_back(create_point(0.755, 1.755));
     }
-    bool GoToPose(geometry_msgs::msg::Pose::SharedPtr pose,int mode_1,int mode_2)
+    /* bool GoToPose(geometry_msgs::msg::Pose::SharedPtr pose,int mode_1,int mode_2)
     {
         using namespace std::placeholders;
-
+        RCLCPP_INFO(this->get_logger(),"In GoToPose");
         nav_to_pose_client->wait_for_action_server();
         auto goal_msg = nav2_msgs::action::NavigateToPose::Goal();
-        goal_msg.pose.pose.position = pose->position;
-        goal_msg.pose.pose.orientation = pose->orientation;
+        goal_msg.pose.pose = *pose;
+        goal_msg.pose.header.stamp = this->now();
         goal_msg.behavior_tree = "";
-
+        rclcpp::WallRate r(loop_rate_);
         current_executing = GO_TO_POSE;
         auto send_goal_options = rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SendGoalOptions();
+        RCLCPP_INFO(this->get_logger(),"After Created send_goal_options");
         send_goal_options.goal_response_callback =
             std::bind(&hoist_decision::goal_response_callback, this, _1 );
-        // send_goal_options.goal_response_callback =
-        //     [this](std::shared_future<rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>::SharedPtr> future) {
-        //         this->goal_response_callback(future);
-        //     };
-        send_goal_options.feedback_callback =
-            std::bind(&hoist_decision::feedback_callback<rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>::SharedPtr,const std::shared_ptr<const nav2_msgs::action::NavigateToPose::Feedback>>, this, _1, _2);
         send_goal_options.result_callback =
-            std::bind(&hoist_decision::result_callback, this, _1, mode_1, mode_2);
-
+            std::bind(&hoist_decision::resultCallback, this, _1,);
+        RCLCPP_INFO(this->get_logger(),"Before async_send_goal");
         auto send_goal_future = nav_to_pose_client->async_send_goal(goal_msg,send_goal_options);
-        rclcpp::spin_until_future_complete(this->get_node_base_interface(),send_goal_future);
-        auto goal_handle = send_goal_future.get();
-        if (goal_handle != NULL ) {
-        if ( goal_handle->get_status() != action_msgs::msg::GoalStatus::STATUS_ACCEPTED ) {
-            if (debug)
-            RCLCPP_INFO(this->get_logger(),"GoToPose request was rejected");
-            current_executing = NONE;
-            return false;
-        }
-        }
-        else {
-            if (debug)
-                RCLCPP_INFO(this->get_logger(),"GoToPose request was rejected");
-            current_executing = NONE;    
-            return false;
-        }
+        RCLCPP_INFO(this->get_logger(),"After async_send_goal");
+        // send_goal_future.wait_for(10s);
+        if (callback_group_executor_.spin_until_future_complete(send_goal_future) ==
+                rclcpp::FutureReturnCode::SUCCESS) {
+                auto goal_handle = send_goal_future.get();
+                // 处理结果
+                if (goal_handle != NULL ) {
+                    if ( goal_handle->get_status() != action_msgs::msg::GoalStatus::STATUS_ACCEPTED ) {
+                    if (debug)
+                    RCLCPP_INFO(this->get_logger(),"FollowWaypoints request was rejected");
+                    current_executing = NONE;
+                    return false;
+                    }
+                }
+                else {
+                    if (debug)
+                    RCLCPP_INFO(this->get_logger(),"FollowWaypoints request was rejected");
+                    current_executing = NONE;    
+                    return false;
+                }
+            } else {
+                RCLCPP_ERROR(this->get_logger(), "Failed to get result");
+            }
+        
+        // callback_group_executor_.spin_until_future_complete(this->get_node_base_interface(),send_goal_future);
+        // rclcpp::spin_until_future_complete(this->get_node_base_interface(),send_goal_future);
+        // auto async_res_future = nav_to_pose_client->async_get_result(send_goal_future.get()); //async_result();
+        RCLCPP_INFO(this->get_logger(),"After async_get_result");
+        // async_res_future.wait_for(10s);
+        // RCLCPP_INFO(this->get_logger(),"After spin_until_future_complete");
+        // auto goal_handle = async_res_future.get();
+        // if (goal_handle.code != rclcpp_action::ResultCode::SUCCEEDED)
+        //     {
+        //         RCLCPP_WARN(get_logger(), "Action did not succeed");
+        //         return false;
+        //     }
         if (debug)
         RCLCPP_INFO(this->get_logger(),"GoToPose request was accepted.");
         //future_go_to_pose = nav_to_pose_client->async_get_result(goal_handle);
-        
+        // callback_group_executor_.spin_some();
+        // r.sleep();
         return true;
-    }
+    } */
 private:
     void pointCloudCallback(const sensor_msgs::msg::PointCloud2::SharedPtr msg) {
         last_received_cloud_ = msg;
@@ -118,12 +160,12 @@ private:
 
     void cycleProcessPoints(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                             std::shared_ptr<std_srvs::srv::Trigger::Response> response) {
-        sorted_target_points_ = findAndSortPointsInRegion(target_points_);
+        //sorted_target_points_ = findAndSortPointsInRegion(target_points_);
         RCLCPP_INFO(this->get_logger(), "seriver is called");
-        std::sort(target_points_set.begin(), target_points_set.end(), 
-                  [this](const geometry_msgs::msg::Point& a, const geometry_msgs::msg::Point& b) {
-                      return distanceToPoint(a) < distanceToPoint(b);
-                  });
+        // std::sort(target_points_set.begin(), target_points_set.end(), 
+        //           [this](const geometry_msgs::msg::Point& a, const geometry_msgs::msg::Point& b) {
+        //               return distanceToPoint(a) < distanceToPoint(b);
+        //           });
         
         switch (cycle_counter_ % 4) { 
             case 0:
@@ -140,47 +182,52 @@ private:
                 break;
         }
         cycle_counter_++;  // Increase the counter
-        response->success = true;
+        response->success = (current_goal_status_ != ActionStatus::SUCCEEDED);
         // return true;
     }
-
     void performFirstAction() {
-        geometry_msgs::msg::Point::Ptr is_target_point = checkPointsForCloud(std::make_shared<geometry_msgs::msg::Point>(target_points_[0]),std::make_shared<geometry_msgs::msg::Point>(target_points_[1]));
-        if (is_target_point){
-            geometry_msgs::msg::Pose::Ptr target_pose = calculateTargetPose(is_target_point, true);
-            bool result = GoToPose(target_pose,1,1);  // Assuming GoToPose is defined elsewhere
-            RCLCPP_INFO(this->get_logger(), "Navigated to pose: success = %s", result ? "true" : "false");
-            // target_points_.erase(target_points_.begin());  // Removing the first point for now
-        }
+        // geometry_msgs::msg::Point::Ptr is_target_point = checkPointsForCloud(std::make_shared<geometry_msgs::msg::Point>(target_points_[0]),std::make_shared<geometry_msgs::msg::Point>(target_points_[1]));
+        //if (is_target_point){
+        RCLCPP_INFO_STREAM(this->get_logger(),"performFirstAction is called"<<target_points_.size());
+        geometry_msgs::msg::Point::Ptr is_target_point = std::make_shared<geometry_msgs::msg::Point>(target_points_[1]);
+        RCLCPP_INFO_STREAM(this->get_logger(),"target_pose Succeed"<<is_target_point);
+        geometry_msgs::msg::Pose::Ptr target_pose = calculateTargetPose(is_target_point, true);
+        RCLCPP_INFO_STREAM(this->get_logger(),"target_pose Succeed"<<target_pose);
+        followWaypoints(target_pose,1,1);  // Assuming GoToPose is defined elsewhere
+        // RCLCPP_INFO(this->get_logger(), "Navigated to pose: success = %s", result ? "true" : "false");
+        // target_points_.erase(target_points_.begin());  // Removing the first point for now
+        //}
     }
 
     void performSecondAction() {
-        geometry_msgs::msg::Point::Ptr is_target_point = checkPointsForCloud(std::make_shared<geometry_msgs::msg::Point>(target_points_[2]),std::make_shared<geometry_msgs::msg::Point>(target_points_[3]));
+        // geometry_msgs::msg::Point::Ptr is_target_point = checkPointsForCloud(std::make_shared<geometry_msgs::msg::Point>(target_points_[2]),std::make_shared<geometry_msgs::msg::Point>(target_points_[3]));
+        RCLCPP_INFO(this->get_logger(), "performSecondAction is called");
+        geometry_msgs::msg::Point::Ptr is_target_point = std::make_shared<geometry_msgs::msg::Point>(target_points_[3]);
         if (is_target_point){
             geometry_msgs::msg::Pose::Ptr target_pose = calculateTargetPose(is_target_point, false);
-            bool result = GoToPose(target_pose,1,2);  // Assuming GoToPose is defined elsewhere
-            RCLCPP_INFO(this->get_logger(), "Navigated to pose: success = %s", result ? "true" : "false");
+            followWaypoints(target_pose,1,2);  // Assuming GoToPose is defined elsewhere
+            // RCLCPP_INFO(this->get_logger(), "Navigated to pose: success = %s", result ? "true" : "false");
             // target_points_.erase(target_points_.begin());  // Removing the first point for now
         }
     }
 
     void performThirdAction() {
         geometry_msgs::msg::Pose::Ptr target_pose = calculateTargetPose(std::make_shared<geometry_msgs::msg::Point>(target_points_set[0]), true);
-        GoToPose(target_pose,3,1);
+        followWaypoints(target_pose,3,1);
     }
 
     void performFourthAction() {
         // Similar to performThirdAction but for back-facing poses
         geometry_msgs::msg::Pose::Ptr target_pose = calculateTargetPose(std::make_shared<geometry_msgs::msg::Point>(target_points_set[1]), true);
-        GoToPose(target_pose,3,2);
+        followWaypoints(target_pose,3,2);
 
     }
     void performFifthAction() {
         geometry_msgs::msg::Point::Ptr is_target_point = checkPointsForCloud(std::make_shared<geometry_msgs::msg::Point>(target_points_[4]),std::make_shared<geometry_msgs::msg::Point>(target_points_[5]));
         if (is_target_point){
             geometry_msgs::msg::Pose::Ptr target_pose = calculateTargetPose(is_target_point, true);
-            bool result = GoToPose(target_pose,1,1);  // Assuming GoToPose is defined elsewhere
-            RCLCPP_INFO(this->get_logger(), "Navigated to pose: success = %s", result ? "true" : "false");
+            followWaypoints(target_pose,1,1);  // Assuming GoToPose is defined elsewhere
+            // RCLCPP_INFO(this->get_logger(), "Navigated to pose: success = %s", result ? "true" : "false");
         }
     }
 
@@ -188,36 +235,36 @@ private:
         geometry_msgs::msg::Point::Ptr is_target_point = checkPointsForCloud(std::make_shared<geometry_msgs::msg::Point>(target_points_[6]),std::make_shared<geometry_msgs::msg::Point>(target_points_[7]));
         if (is_target_point){
             geometry_msgs::msg::Pose::Ptr target_pose = calculateTargetPose(is_target_point, false);
-            bool result = GoToPose(target_pose,1,2);  // Assuming GoToPose is defined elsewhere
-            RCLCPP_INFO(this->get_logger(), "Navigated to pose: success = %s", result ? "true" : "false");
+            followWaypoints(target_pose,1,2);  // Assuming GoToPose is defined elsewhere
+            // RCLCPP_INFO(this->get_logger(), "Navigated to pose: success = %s", result ? "true" : "false");
         }
     }
 
     void performSenevthAction() {
         geometry_msgs::msg::Pose::Ptr target_pose = calculateTargetPose(std::make_shared<geometry_msgs::msg::Point>(special_point_), true);
-        GoToPose(target_pose,2,1);
+        followWaypoints(target_pose,2,1);
     }
 
     void performEighthAction() {
         geometry_msgs::msg::Pose::Ptr target_pose = calculateTargetPose(std::make_shared<geometry_msgs::msg::Point>(target_points_set[2]), false);
-        GoToPose(target_pose,3,2);
+        followWaypoints(target_pose,3,2);
 
     }
     void performNinthAction() {
         geometry_msgs::msg::Point::Ptr is_target_point = checkPointsForCloud(std::make_shared<geometry_msgs::msg::Point>(target_points_[8]),std::make_shared<geometry_msgs::msg::Point>(target_points_[9]));
         if (is_target_point){
             geometry_msgs::msg::Pose::Ptr target_pose = calculateTargetPose(is_target_point, true);
-            bool result = GoToPose(target_pose,1,2);  // Assuming GoToPose is defined elsewhere
-            RCLCPP_INFO(this->get_logger(), "Navigated to pose: success = %s", result ? "true" : "false");
+            followWaypoints(target_pose,1,2);  // Assuming GoToPose is defined elsewhere
+            // RCLCPP_INFO(this->get_logger(), "Navigated to pose: success = %s", result ? "true" : "false");
         }
     }
     void performTenthAction() {
         geometry_msgs::msg::Pose::Ptr target_pose = calculateTargetPose(std::make_shared<geometry_msgs::msg::Point>(target_points_set[3]), true);
-        GoToPose(target_pose,3,2);
+        followWaypoints(target_pose,3,2);
 
     }
     geometry_msgs::msg::Pose::Ptr calculateTargetPose(geometry_msgs::msg::Point::Ptr target, bool face_towards) {
-        geometry_msgs::msg::Pose::Ptr pose;
+        auto pose = std::make_shared<geometry_msgs::msg::Pose>();
         double dx = target->x - robot_position_.x;
         double dy = target->y - robot_position_.y;
         double angle = atan2(dy, dx);
@@ -289,15 +336,98 @@ private:
     double distanceToPoint(const geometry_msgs::msg::Point& point) {
         return sqrt(pow(point.x - robot_position_.x, 2) + pow(point.y - robot_position_.y, 2));
     }
+    void resultCallback(
+    const rclcpp_action::ClientGoalHandle<ClientT>::WrappedResult & result)
+    {
+    if (result.goal_id != future_goal_handle_.get()->get_goal_id()) {
+        RCLCPP_DEBUG(
+        get_logger(),
+        "Goal IDs do not match for the current goal handle and received result."
+        "Ignoring likely due to receiving result for an old goal.");
+        return;
+    }
+
+    switch (result.code) {
+        case rclcpp_action::ResultCode::SUCCEEDED:
+        current_goal_status_ = ActionStatus::SUCCEEDED;
+        return;
+        case rclcpp_action::ResultCode::ABORTED:
+        current_goal_status_ = ActionStatus::FAILED;
+        return;
+        case rclcpp_action::ResultCode::CANCELED:
+        current_goal_status_ = ActionStatus::FAILED;
+        return;
+        default:
+        current_goal_status_ = ActionStatus::UNKNOWN;
+        return;
+    }
+    }
+
+    void followWaypoints(geometry_msgs::msg::Pose::SharedPtr pose,int mode_1,int mode_2)
+    {
+        // auto goal = action_server_->get_current_goal();
+        // auto feedback = std::make_shared<ActionT::Feedback>();
+        // auto result = std::make_shared<ActionT::Result>();
+
+        rclcpp::WallRate r(loop_rate_);
+        bool new_goal = true;
+
+        while (rclcpp::ok()) {
+            if (new_goal) {
+                new_goal = false;
+                ClientT::Goal client_goal;
+                client_goal.pose.pose = *pose;
+
+                auto send_goal_options = rclcpp_action::Client<ClientT>::SendGoalOptions();
+                send_goal_options.result_callback =
+                    std::bind(&hoist_decision::resultCallback, this, std::placeholders::_1);
+                send_goal_options.goal_response_callback =
+                    std::bind(&hoist_decision::goal_response_callback, this, std::placeholders::_1);
+                future_goal_handle_ =
+                    nav_to_pose_client->async_send_goal(client_goal, send_goal_options);
+                current_goal_status_ = ActionStatus::PROCESSING;
+            }
+
+            if (current_goal_status_ == ActionStatus::FAILED) {
+                RCLCPP_WARN(
+                get_logger(), "Failed to process waypoint in waypoint "
+                "list and stop on failure is enabled."
+                " Terminating action.");
+                return;
+            } else if (current_goal_status_ == ActionStatus::SUCCEEDED) {
+            RCLCPP_INFO(
+                get_logger(), "Succeeded processing waypoint, processing waypoint task execution");
+            bool is_task_executed =processAtWaypoint(mode_1,mode_2);
+            RCLCPP_INFO(
+                get_logger(), "Task execution at waypoint%s",
+                is_task_executed ? "succeeded" : "failed!");
+            // if task execution was failed and stop_on_failure_ is on , terminate action
+            }
+            if (current_goal_status_ != ActionStatus::PROCESSING &&
+            current_goal_status_ != ActionStatus::UNKNOWN)
+            {
+            // Update server state
+            new_goal = true;
+            RCLCPP_INFO_EXPRESSION(
+                get_logger(),
+                (static_cast<int>(now().seconds()) % 30 == 0),
+                "Processing waypoint ...");
+            }
+
+            callback_group_executor_.spin_some();
+            r.sleep();
+        }
+    }
     void result_callback(const rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>::WrappedResult & result,int & mode_1,int & mode_2)
     {
         auto gimble_message = hoist_msgs::msg::Gimble();
+        RCLCPP_INFO_STREAM(this->get_logger(),"Result callbacked");
         switch (result.code) {
             case rclcpp_action::ResultCode::SUCCEEDED:
                 RCLCPP_INFO(this->get_logger(), "Goal succeeded");
-                gimble_message.mod_1 = mode_1;
-                gimble_message.mod_2 = mode_2;
-                gimble_publisher_->publish(gimble_message);
+                // gimble_message.mod_1 = mode_1;
+                // gimble_message.mod_2 = mode_2;
+                // gimble_publisher_->publish(gimble_message);
                 break;
             case rclcpp_action::ResultCode::ABORTED:
                 RCLCPP_ERROR(this->get_logger(), "Goal was aborted");
@@ -347,26 +477,45 @@ private:
         point.z = z;
         return point;
     }
+    bool processAtWaypoint(int mode_1,int mode_2){
+        auto msg = hoist_msgs::msg::Gimble();
+        msg.mod_1 = mode_1;
+        msg.mod_2 = mode_2;
+        gimble_publisher_->publish(msg);
+    }
     rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr point_cloud_subscription_;
     rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_subscription_;
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr service_;
     rclcpp::Publisher<hoist_msgs::msg::Gimble>::SharedPtr gimble_publisher_;
     rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SharedPtr nav_to_pose_client;
+    ActionStatus current_goal_status_;
+    std::shared_future<rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>::WrappedResult> future_go_to_pose;
+    rclcpp::CallbackGroup::SharedPtr callback_group_;
+    rclcpp::executors::MultiThreadedExecutor callback_group_executor_;
+    rclcpp::CallbackGroup::SharedPtr service_cb_group_;
+    std::shared_future<rclcpp_action::ClientGoalHandle<ClientT>::SharedPtr> future_goal_handle_;
     std::vector<geometry_msgs::msg::Point> target_points_,target_points_set,sorted_target_points_,sorted_target_points_set;
     geometry_msgs::msg::Point robot_position_, special_point_;
     sensor_msgs::msg::PointCloud2::Ptr last_received_cloud_;
     std::string point_cloud_topic, odom_topic;
+    int loop_rate_ = 20;
     float r;  // Distance to maintain from the target point
     int cycle_counter_ = 0;  // Counter for service calls
     bool special_is_remove = false;
-    bool debug = false;
+    bool debug = true;
+    bool stop_on_failure_ = false;
     int current_executing;
     rclcpp_action::ResultCode status;
 };
 
 int main(int argc, char* argv[]) {
     rclcpp::init(argc, argv);
-    rclcpp::spin(std::make_shared<hoist_decision>());
+    auto node = std::make_shared<hoist_decision>();
+    // rclcpp::executors::MultiThreadedExecutor executor;
+    // executor.add_node(node);
+    // executor.spin();
+    // executor.remove_node(node);
+    rclcpp::spin(node->get_node_base_interface());
     rclcpp::shutdown();
     return 0;
 }
