@@ -30,6 +30,7 @@ install(
     config
     world
     urdf
+    map
   DESTINATION share/${PROJECT_NAME}/
 )
 install(
