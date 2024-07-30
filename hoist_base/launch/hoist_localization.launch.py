@@ -68,13 +68,13 @@ def generate_launch_description():
     #       name='slam_toolbox',
     #       output='screen'
     #     )
-    map_server = IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(os.path.join(navigation2_launch_dir, 'map_server_launch.py')),
-            launch_arguments={
-                'use_sim_time': use_sim_time,
-                'map': nav2_map_dir,
-                'params_file': params_file,
-                'container_name': 'nav2_container'}.items())
+    # map_server = IncludeLaunchDescription(
+    #         PythonLaunchDescriptionSource(os.path.join(navigation2_launch_dir, 'map_server_launch.py')),
+    #         launch_arguments={
+    #             'use_sim_time': use_sim_time,
+    #             'map': nav2_map_dir,
+    #             'params_file': params_file,
+    #             'container_name': 'nav2_container'}.items())
 
     ld = LaunchDescription()
     ld.add_action(declare_params_file_cmd)
