@@ -58,10 +58,10 @@ public:
         odom_x += delta_x;
         odom_y += delta_y;
         odom_th += delta_th;
-    
+
         //since all odometry is 6DOF we'll need a quaternion created from yaw
 		tf2::Quaternion q;
-		q.setRPY(0, 0, -yaw.d);
+		q.setRPY(0, 0, odom_th);
         geometry_msgs::msg::Quaternion odom_quat = tf2::toMsg(q);
 		if (broadcast_tf){
         //first, we'll publish the transform over tf
