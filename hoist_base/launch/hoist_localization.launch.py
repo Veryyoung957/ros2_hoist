@@ -49,25 +49,25 @@ def generate_launch_description():
                               'params_file': params_file,
                               'use_lifecycle_mgr': 'false',
                               'map_subscribe_transient_local': 'true'}.items())
-    # start_localization = IncludeLaunchDescription(
-    #         PythonLaunchDescriptionSource(os.path.join(navigation2_launch_dir,
-    #                                                    'localization_launch.py')),
-    #         launch_arguments={'map': nav2_map_dir,
-    #                           'use_sim_time': use_sim_time,
-    #                           'params_file': params_file,
-    #                           'use_lifecycle_mgr': 'false'}.items())
-    start_localization = launch_ros.actions.Node(
-          parameters=[
-            slam_toolbox_localization_file_dir ,
-            {'use_sim_time': use_sim_time,
-                    'map_file_name': slam_toolbox_map_dir,
-                    'map_start_pose': [0.0, 0.0, 0.0]}
-          ],
-          package='slam_toolbox',
-          executable='localization_slam_toolbox_node',
-          name='slam_toolbox',
-          output='screen'
-        )
+    start_localization = IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(os.path.join(navigation2_launch_dir,
+                                                       'localization_launch.py')),
+            launch_arguments={'map': nav2_map_dir,
+                              'use_sim_time': use_sim_time,
+                              'params_file': params_file,
+                              'use_lifecycle_mgr': 'false'}.items())
+    # start_localization = launch_ros.actions.Node(
+    #       parameters=[
+    #         slam_toolbox_localization_file_dir ,
+    #         {'use_sim_time': use_sim_time,
+    #                 'map_file_name': slam_toolbox_map_dir,
+    #                 'map_start_pose': [0.0, 0.0, 0.0]}
+    #       ],
+    #       package='slam_toolbox',
+    #       executable='localization_slam_toolbox_node',
+    #       name='slam_toolbox',
+    #       output='screen'
+    #     )
     map_server = IncludeLaunchDescription(
             PythonLaunchDescriptionSource(os.path.join(navigation2_launch_dir, 'map_server_launch.py')),
             launch_arguments={
