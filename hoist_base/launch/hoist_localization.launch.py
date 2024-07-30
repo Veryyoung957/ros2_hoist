@@ -81,5 +81,5 @@ def generate_launch_description():
     # ld.add_action(start_mapping)
     ld.add_action(start_navigation2)
     ld.add_action(start_localization)
-    ld.add_action(map_server)
+    # ld.add_action(map_server)
     return ld
