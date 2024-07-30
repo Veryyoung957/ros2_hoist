@@ -13,7 +13,7 @@ def generate_launch_description():
     pkg_share = get_package_share_directory('hoist_base')
     default_model_path = os.path.join(pkg_share, 'urdf/hoist.urdf')
     navigation2_launch_dir = os.path.join(get_package_share_directory('hoist_navigation'), 'launch')
-    nav2_map_dir = os.path.join(pkg_share, 'map', 'map.yaml')
+    nav2_map_dir = os.path.join(pkg_share, 'map', 'test2.yaml')
     slam_toolbox_localization_file_dir = os.path.join(pkg_share, 'config', 'mapper_params_localization.yaml')
     slam_toolbox_map_dir = PathJoinSubstitution([pkg_share, 'map', 'test2'])
     # nav2_params_file_dir = os.path.join(pkg_share, 'config', 'nav2_params_real.yaml')
