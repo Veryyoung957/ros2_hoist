@@ -60,13 +60,13 @@ def generate_launch_description():
     #     output='screen',
     #     arguments=['-d', LaunchConfiguration('rvizconfig')],
     # )
-    robot_localization_node = launch_ros.actions.Node(
-         package='robot_localization',
-         executable='ekf_node',
-         name='ekf_filter_node',
-         output='screen',
-         parameters=[os.path.join(pkg_share, 'config/ekf.yaml'), {'use_sim_time': use_sim_time}]
-    )
+    # robot_localization_node = launch_ros.actions.Node(
+    #      package='robot_localization',
+    #      executable='ekf_node',
+    #      name='ekf_filter_node',
+    #      output='screen',
+    #      parameters=[os.path.join(pkg_share, 'config/ekf.yaml'), {'use_sim_time': use_sim_time}]
+    # )
     lidar_start = IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(os.path.join(rplidar,'launch','rplidar_a2m8_launch.py')),
                 launch_arguments= {
@@ -90,7 +90,7 @@ def generate_launch_description():
     ld.add_action(start_robot_state_publisher_cmd)
     ld.add_action(joint_state_publisher_node)
     ld.add_action(lidar_start)
-    ld.add_action(robot_localization_node)
+    # ld.add_action(robot_localization_node)
     ld.add_action(start_nav_mapping)
     ld.add_action(declare_world_cmd)
     ld.add_action(scan_filter)
