@@ -15,7 +15,7 @@ def generate_launch_description():
     navigation2_launch_dir = os.path.join(get_package_share_directory('hoist_navigation'), 'launch')
     nav2_map_dir = os.path.join(pkg_share, 'map', 'map.yaml')
     slam_toolbox_localization_file_dir = os.path.join(pkg_share, 'config', 'mapper_params_localization.yaml')
-    slam_toolbox_map_dir = PathJoinSubstitution([pkg_share, 'map', 'test1'])
+    slam_toolbox_map_dir = PathJoinSubstitution([pkg_share, 'map', 'test1.yaml'])
     # nav2_params_file_dir = os.path.join(pkg_share, 'config', 'nav2_params_real.yaml')
     params_file = LaunchConfiguration('params_file')
     use_sim_time = LaunchConfiguration('use_sim_time', default='False')
@@ -56,17 +56,24 @@ def generate_launch_description():
     #                           'use_sim_time': use_sim_time,
     #                           'params_file': params_file,
     #                           'use_lifecycle_mgr': 'false'}.items())
-    start_localization = Node(
-                package='slam_toolbox',
-                executable='localization_slam_toolbox_node',
-                name='slam_toolbox',
-                parameters=[
-                    slam_toolbox_localization_file_dir,
-                    {'use_sim_time': use_sim_time,
-                    'map_file_name': slam_toolbox_map_dir,
-                    'map_start_pose': [0.0, 0.0, 0.0]}
-                ],
-            ),
+    start_localization = launch_ros.actions.Node(
+          parameters=[
+            slam_toolbox_localization_file_dir + '/config/mapper_params_localization.yaml'
+          ],
+          package='slam_toolbox',
+          executable='localization_slam_toolbox_node',
+          name='slam_toolbox',
+          output='screen'
+        )
+    IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(os.path.join(navigation2_launch_dir, 'map_server_launch.py')),
+            condition = LaunchConfigurationNotEquals('localization', 'slam_toolbox'),
+            launch_arguments={
+                'use_sim_time': use_sim_time,
+                'map': nav2_map_dir,
+                'params_file': declare_params_file_cmd,
+                'container_name': 'nav2_container'}.items())
+
     ld = LaunchDescription()
     ld.add_action(declare_params_file_cmd)
     # ld.add_action(start_mapping)
