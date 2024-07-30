@@ -33,7 +33,7 @@ def generate_launch_description():
         output='screen'
     )
     start_navigation2 = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(navigation2_launch_dir, 'navigation_launch.py')),
+        PythonLaunchDescriptionSource(os.path.join(navigation2_launch_dir, 'localization_amcl_launch.py')),
         launch_arguments={
             'use_sim_time': use_sim_time,
             'map': nav2_map_dir,
