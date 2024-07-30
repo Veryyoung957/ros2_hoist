@@ -23,7 +23,7 @@ public:
     hoist_base() : Node("hoist_base"){
         port = this->declare_parameter<std::string>("port", "/dev/ttyUSB0");
         imu_tf_child_frame_id = this->declare_parameter<std::string>("imu_tf_child_frame_id", "base_link");
-        imu_tf_frame_id = this->declare_parameter<std::string>("imu_tf_frame_id", "base_link");
+        imu_tf_frame_id = this->declare_parameter<std::string>("imu_tf_frame_id", "imu_link");
         imu_frame_id = this->declare_parameter<std::string>("odomframe_id", "imu_link");
 		odom_child_frame_id = this->declare_parameter<std::string>("odom_tf_child_frame_id", "base_link");
         odom_frame_id = this->declare_parameter<std::string>("odom_frame_id", "odom");
