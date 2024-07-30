@@ -65,7 +65,7 @@ def generate_launch_description():
           name='slam_toolbox',
           output='screen'
         )
-    IncludeLaunchDescription(
+    map_server = IncludeLaunchDescription(
             PythonLaunchDescriptionSource(os.path.join(navigation2_launch_dir, 'map_server_launch.py')),
             condition = LaunchConfigurationNotEquals('localization', 'slam_toolbox'),
             launch_arguments={
@@ -79,4 +79,5 @@ def generate_launch_description():
     # ld.add_action(start_mapping)
     ld.add_action(start_navigation2)
     ld.add_action(start_localization)
+    ld.add_action(map_server)
     return ld
