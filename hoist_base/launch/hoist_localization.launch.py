@@ -32,15 +32,29 @@ def generate_launch_description():
         name='slam_toolbox',
         output='screen'
     )
+    # start_navigation2 = IncludeLaunchDescription(
+    #     PythonLaunchDescriptionSource(os.path.join(navigation2_launch_dir, 'localization_amcl_launch.py')),
+    #     launch_arguments={
+    #         'use_sim_time': use_sim_time,
+    #         'map': nav2_map_dir,
+    #         'params_file': params_file}.items()
+    # )
     start_navigation2 = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(navigation2_launch_dir, 'localization_amcl_launch.py')),
-        launch_arguments={
-            'use_sim_time': use_sim_time,
-            'map': nav2_map_dir,
-            'params_file': params_file}.items()
-    )
+            PythonLaunchDescriptionSource(os.path.join(navigation2_launch_dir, 'navigation_launch.py')),
+            launch_arguments={'use_sim_time': use_sim_time,
+                              'params_file': params_file,
+                              'use_lifecycle_mgr': 'false',
+                              'map_subscribe_transient_local': 'true'}.items())
+    start_localization = IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(os.path.join(navigation2_launch_dir,
+                                                       'localization_launch.py')),
+            launch_arguments={'map': nav2_map_dir,
+                              'use_sim_time': use_sim_time,
+                              'params_file': params_file,
+                              'use_lifecycle_mgr': 'false'}.items())
     ld = LaunchDescription()
     ld.add_action(declare_params_file_cmd)
     # ld.add_action(start_mapping)
     ld.add_action(start_navigation2)
+    ld.add_action(start_localization)
     return ld
