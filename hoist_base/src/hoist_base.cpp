@@ -28,7 +28,7 @@ public:
 		odom_child_frame_id = this->declare_parameter<std::string>("odom_tf_child_frame_id", "base_link");
         odom_frame_id = this->declare_parameter<std::string>("odom_frame_id", "odom");
         time_offset_in_seconds = this->declare_parameter<double>("time_offset_in_seconds", 0.0);
-        broadcast_tf = this->declare_parameter<bool>("broadcast_tf", false);
+        broadcast_tf = this->declare_parameter<bool>("broadcast_tf", true);
         imu_linear_acceleration_variance = this->declare_parameter<double>("imu_linear_acceleration_variance", 0.00117);
         imu_angular_velocity_variance = this->declare_parameter<double>("imu_angular_velocity_variance", 0.0000238);
         imu_orientation_variance = this->declare_parameter<double>("imu_orientation_variance", 0.002);
@@ -47,6 +47,10 @@ public:
 	bool car_twist_publisher(){
 		rclcpp::Duration duration = current_time - last_time;
 		double dt = duration.seconds();
+		tf2::Matrix3x3 obs_mat;
+		obs_mat.setEulerYPR(-yaw.d, pitch.d, roll.d);
+		tf2::Quaternion orientation;
+		obs_mat.getRotation(orientation);
         double delta_x = (odom_v_x.d * cos(odom_th) - odom_v_y.d * sin(odom_th)) * dt;
         double delta_y = (odom_v_x.d * sin(odom_th) + odom_v_y.d * cos(odom_th)) * dt;
         double delta_th = odom_v_th.d * dt;
@@ -57,7 +61,7 @@ public:
     
         //since all odometry is 6DOF we'll need a quaternion created from yaw
 		tf2::Quaternion q;
-		q.setRPY(0, 0, odom_th);
+		q.setRPY(0, 0, -yaw.d);
         geometry_msgs::msg::Quaternion odom_quat = tf2::toMsg(q);
 		if (broadcast_tf){
         //first, we'll publish the transform over tf
