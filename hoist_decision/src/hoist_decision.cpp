@@ -67,23 +67,23 @@ public:
             get_node_logging_interface(),
             get_node_waitables_interface(),
             "navigate_to_pose", callback_group_);
-        target_points_.push_back(create_point(0.05f, 0.0));
-        target_points_.push_back(create_point(0.425, 0.0));
-        target_points_.push_back(create_point(0.425, -1.29903));
-        target_points_.push_back(create_point(0.6125, -0.64951));
-        target_points_.push_back(create_point(1.175, -1.29903));
-        target_points_.push_back(create_point(0.9875, 0.64951));
-        target_points_.push_back(create_point(1.550, 0.0));
-        target_points_.push_back(create_point(1.175, 0.0));
-        target_points_.push_back(create_point(1.175, -1.29903));
-        target_points_.push_back(create_point(0.9875, 0.64951));
-        target_points_.push_back(create_point(0.425, 1.29903));
-        target_points_.push_back(create_point(0.6125, 0.64951));
+        target_points_.push_back(create_point(0.0, 0.05f));
+        target_points_.push_back(create_point(0.0, 0.425));
+        target_points_.push_back(create_point(-1.29903, 0.425));
+        target_points_.push_back(create_point(-0.64951, 0.6125));
+        target_points_.push_back(create_point(-1.29903, 1.175));
+        target_points_.push_back(create_point(-0.64951, 0.9875));
+        target_points_.push_back(create_point(0.0, 1.550));
+        target_points_.push_back(create_point(0.0, 1.175));
+        target_points_.push_back(create_point(1.29903, 1.175));
+        target_points_.push_back(create_point(0.64951, 0.9875));
+        target_points_.push_back(create_point(1.29903, 0.425));
+        target_points_.push_back(create_point(0.64951, 0.6125));
         special_point_ = create_point(0.0,1.2);  // Special target point
-        target_points_set.push_back(create_point(1.305, 0.755));
-        target_points_set.push_back(create_point(1.305, 755));
-        target_points_set.push_back(create_point(1.755, 0.755));
-        target_points_set.push_back(create_point(1.755, 0.755));
+        target_points_set.push_back(create_point(0.755, -1.305));
+        target_points_set.push_back(create_point(-0.755, -1.305));
+        target_points_set.push_back(create_point(-0.755, 1.755));
+        target_points_set.push_back(create_point(0.755, 1.755));
     }
     /* bool GoToPose(geometry_msgs::msg::Pose::SharedPtr pose,int mode_1,int mode_2)
     {
