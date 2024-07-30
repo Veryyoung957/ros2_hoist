@@ -41,7 +41,7 @@ public:
     hoist_decision() : Node("point_cloud_processor") {
         point_cloud_topic = this->declare_parameter<std::string>("point_cloud_topic", "/cloud");
         odom_topic = this->declare_parameter<std::string>("odom_topic", "/odometry/filtered");
-        r = this->declare_parameter<float>("distance_to_target", 0.0); // Distance r from target
+        r = this->declare_parameter<float>("distance_to_target", 0.4); // Distance r from target
 
         point_cloud_subscription_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
             point_cloud_topic, rclcpp::SensorDataQoS(), std::bind(&hoist_decision::pointCloudCallback, this, std::placeholders::_1));
