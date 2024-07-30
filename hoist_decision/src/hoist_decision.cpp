@@ -67,18 +67,18 @@ public:
             get_node_logging_interface(),
             get_node_waitables_interface(),
             "navigate_to_pose", callback_group_);
-        target_points_.push_back(create_point(0.0, 0.05f));
-        target_points_.push_back(create_point(0.0, 0.425));
-        target_points_.push_back(create_point(-1.29903, 0.425));
-        target_points_.push_back(create_point(-0.64951, 0.6125));
-        target_points_.push_back(create_point(-1.29903, 1.175));
-        target_points_.push_back(create_point(-0.64951, 0.9875));
-        target_points_.push_back(create_point(0.0, 1.550));
-        target_points_.push_back(create_point(0.0, 1.175));
-        target_points_.push_back(create_point(1.29903, 1.175));
-        target_points_.push_back(create_point(0.64951, 0.9875));
-        target_points_.push_back(create_point(1.29903, 0.425));
-        target_points_.push_back(create_point(0.64951, 0.6125));
+        target_points_.push_back(create_point(0.0, 0.450));
+        target_points_.push_back(create_point(0.0, 0.825));
+        target_points_.push_back(create_point(-1.29903, 0.825));
+        target_points_.push_back(create_point(-0.64951, 1.0125));
+        target_points_.push_back(create_point(-1.29903, 1.575));
+        target_points_.push_back(create_point(-0.64951, 1.4875));
+        target_points_.push_back(create_point(0.0, 1.950));
+        target_points_.push_back(create_point(0.0, 1.575));
+        target_points_.push_back(create_point(1.29903, 1.575));
+        target_points_.push_back(create_point(0.64951, 1.4875));
+        target_points_.push_back(create_point(1.29903, 0.925));
+        target_points_.push_back(create_point(0.64951, 1.0125));
         special_point_ = create_point(0.0,1.2);  // Special target point
         target_points_set.push_back(create_point(0.755, -1.305));
         target_points_set.push_back(create_point(-0.755, -1.305));
@@ -202,7 +202,7 @@ private:
     void performSecondAction() {
         // geometry_msgs::msg::Point::Ptr is_target_point = checkPointsForCloud(std::make_shared<geometry_msgs::msg::Point>(target_points_[2]),std::make_shared<geometry_msgs::msg::Point>(target_points_[3]));
         RCLCPP_INFO(this->get_logger(), "performSecondAction is called");
-        geometry_msgs::msg::Point::Ptr is_target_point = std::make_shared<geometry_msgs::msg::Point>(target_points_[3]);
+        geometry_msgs::msg::Point::Ptr is_target_point = std::make_shared<geometry_msgs::msg::Point>(target_points_[2]);
         if (is_target_point){
             geometry_msgs::msg::Pose::Ptr target_pose = calculateTargetPose(is_target_point, false);
             followWaypoints(target_pose,1,2);  // Assuming GoToPose is defined elsewhere
@@ -263,19 +263,42 @@ private:
         followWaypoints(target_pose,3,2);
 
     }
+    // geometry_msgs::msg::Pose::Ptr calculateTargetPose(geometry_msgs::msg::Point::Ptr target, bool face_towards) {
+    //     auto pose = std::make_shared<geometry_msgs::msg::Pose>();
+    //     double dx = target->x - robot_position_.x;
+    //     double dy = target->y - robot_position_.y;
+    //     double angle = atan2(dy, dx);
+
+    //     if (!face_towards) {
+    //         angle += M_PI;  // Add π to face away
+    //     }
+
+    //     // Calculate the pose at distance r from the target
+    //     pose->position.x = target->x - r * cos(angle);
+    //     pose->position.y = target->y - r * sin(angle);
+    //     pose->position.z = 0;  // Assuming flat terrain
+
+    //     // Orientation as a quaternion
+    //     tf2::Quaternion q;
+    //     q.setRPY(0, 0, angle);
+    //     pose->orientation.x = q.x();
+    //     pose->orientation.y = q.y();
+    //     pose->orientation.z = q.z();
+    //     pose->orientation.w = q.w();
+
+    //     return pose;
+    // }
     geometry_msgs::msg::Pose::Ptr calculateTargetPose(geometry_msgs::msg::Point::Ptr target, bool face_towards) {
         auto pose = std::make_shared<geometry_msgs::msg::Pose>();
-        double dx = target->x - robot_position_.x;
-        double dy = target->y - robot_position_.y;
-        double angle = atan2(dy, dx);
+        double angle = 3.1415926;
 
         if (!face_towards) {
             angle += M_PI;  // Add π to face away
         }
 
         // Calculate the pose at distance r from the target
-        pose->position.x = target->x - r * cos(angle);
-        pose->position.y = target->y - r * sin(angle);
+        pose->position.x = target->x;
+        pose->position.y = target->y - r;
         pose->position.z = 0;  // Assuming flat terrain
 
         // Orientation as a quaternion
