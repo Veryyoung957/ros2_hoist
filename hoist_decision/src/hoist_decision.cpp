@@ -170,16 +170,16 @@ private:
         switch (cycle_counter_ % 4) { 
             case 0:
                 performFirstAction();
-                break;
+                // break;
             case 1:
                 performSecondAction();
-                break;
+                // break;
             case 2:
                 performThirdAction();
-                break;
+                // break;
             case 3:
                 performFourthAction(); 
-                break;
+                // break;
         }
         cycle_counter_++;  // Increase the counter
         response->success = (current_goal_status_ != ActionStatus::SUCCEEDED);
